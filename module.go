@@ -2,6 +2,8 @@ package module
 
 import (
 	"context"
+	"os"
+	"os/signal"
 	"sync"
 )
 
@@ -46,8 +48,16 @@ type ModuleHub struct {
 }
 
 func (hub *ModuleHub)Cancel()  {
-	hub.Cancel()
+	hub.cancel()
 	hub.ModuleList.waitGrop.Wait()
+}
+
+func (hub *ModuleHub)RunLoop()  {
+	c := make(chan os.Signal)
+	signal.Notify(c)
+	<-c //阻塞等待
+	hub.Cancel()
+	close(c)
 }
 
 func NewModuleHub() *ModuleHub {
